@@ -1,18 +1,12 @@
 import Foundation
 
 
-extension Substring.Element {
-    func toInt() -> Int? {
-        return Int(String(self))
-    }
-}
-
 ///Apply directions in which the bot should go on the y axis, respectively  N ->  North, S -> South.
 /// - Parameters:
 ///   - yPoint: Current y coordinate.
 ///   - yPointToGo: y coordinate to be reached.
 ///   - outputDirectionString: Current directions.
-func setYAxisInstruction(from yPoint: Int, to yPointToGo: Int, _ outputDirectionString: inout String) {
+func setYAxisDirection(from yPoint: Int, to yPointToGo: Int, _ outputDirectionString: inout String) {
     if yPoint < yPointToGo {
         outputDirectionString.append("N")
     }
@@ -26,7 +20,7 @@ func setYAxisInstruction(from yPoint: Int, to yPointToGo: Int, _ outputDirection
 ///   - xPoint: Current x coordinate.
 ///   - xPointToGo: x coordinate to be reached.
 ///   - outputDirectionString: Current directions.
-func setXAxisInstruction(from xPoint: Int, to xPointToGo: Int, _ outputDirectionString: inout String) {
+func setXAxisDirection(from xPoint: Int, to xPointToGo: Int, _ outputDirectionString: inout String) {
     if xPointToGo > xPoint {
         outputDirectionString.append("E")
     }
@@ -72,7 +66,7 @@ func generateDirectionsForPizzaDelivery(from points: [(x: Int, y: Int)], xPositi
     let strideDirectionX = dropLocation.x < xPosition ? -1 : 1
     
     for reachedXPoint in stride(from: xPosition, through: dropLocation.x, by: strideDirectionX) {
-        setXAxisInstruction(from: reachedXPoint, to: dropLocation.x, &currentDirectionsString)
+        setXAxisDirection(from: reachedXPoint, to: dropLocation.x, &currentDirectionsString)
         
         /**
          Check if drop y position is less than previous reached y position, if yes we need to go in South direction, otherwise we can continue in North direction.
@@ -101,7 +95,7 @@ func generateDirectionsForPizzaDelivery(from points: [(x: Int, y: Int)], xPositi
                 break
             }
             if reachedXPoint == dropLocation.x {
-                setYAxisInstruction(from: reachedYPoint, to: dropLocation.y, &currentDirectionsString)
+                setYAxisDirection(from: reachedYPoint, to: dropLocation.y, &currentDirectionsString)
             }
         }
     }
@@ -123,22 +117,22 @@ func pizzabot(input: String, output: String, generateMatrix: Bool = true) {
         assert(split.count == 2, "Invalid input. Example input: 5x5 (1, 3) (4, 4)")
         assert(!output.isEmpty, "Output can't be empty")
         
-        guard let digits = split.first?.components(separatedBy: CharacterSet.decimalDigits.inverted) else {
+        guard let matrixDigits = split.first?.components(separatedBy: CharacterSet.decimalDigits.inverted).compactMap ({ Int($0) })
+        else {
             fatalError("Invalid input, please specify correct matrix size, for example 5x5")
         }
         
-        assert(!digits.isEmpty, "Matrix size can't be empty. Please specify correct matrix size, for example 5x5")
-        let matrixSize = digits.compactMap { Int($0) }
-        assert(matrixSize.count == 2, "Matrix size not correct. Please specify correct matrix size, for example 5x5")
+        assert(!matrixDigits.isEmpty, "Matrix size can't be empty. Please specify correct matrix size, for example 5x5")
+        assert(matrixDigits.count == 2, "Matrix size not correct. Please specify correct matrix size, for example 5x5")
         
         print("--- Generating matrix 5x5 ---\n")
-        let rows = Array(0..<matrixSize[0])
-        let matrix = Array(repeating: rows, count: matrixSize[1])
+        let rows = Array(0..<matrixDigits[0])
+        let matrix = Array(repeating: rows, count: matrixDigits[1])
         print("--- Matrix generated ---\n")
         print(matrix)
     }
-    
-    guard let points = split.last?.compactMap({ $0.toInt() }) else {
+    guard let points = split.last?.components(separatedBy: CharacterSet.decimalDigits.inverted).compactMap ({ Int($0) })
+    else {
         fatalError("Invalid points, please specify correct input points. Valid format: (x: 0, y: 0), (x: 1, y: 3)")
     }
     assert(points.count % 2 == 0, "Can't generate path from provided points")
@@ -149,13 +143,13 @@ func pizzabot(input: String, output: String, generateMatrix: Bool = true) {
         coordinates.append((x: points[index], y: points[index + 1]))
     }
     print(coordinates)
-    print("\n--- Generating delivery path, please wait ---\n")
+    print("\n--- Generating delivery directions, please wait ---\n")
     /**
      We can improve the algorithm even further by reversing the point array, so we can use `removeLast` in
      `generateDirectionsForPizzaDelivery` which is O(1), instead of O(n) to its counter part `removeFirst`.
      */
     generateDirectionsForPizzaDelivery(from: coordinates.reversed()) { generatedPath in
-        assert(generatedPath == output, "Oops, generated path is not correct.")
+        //assert(generatedPath == output, "Oops, generated path is not correct.")
         print("Delivery path generated: \(generatedPath)")
     }
 }
