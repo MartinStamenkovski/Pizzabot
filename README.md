@@ -10,6 +10,8 @@ In more specific terms, given a grid (where each point on the grid is one house)
 
 Pizzabot always starts at the origin point, (0, 0). As with a Cartesian plane, this point lies at the most south-westerly point of the grid.
 
+![logo](https://github.com/MartinStamenkovski/Pizzabot/raw/main/cartesian.png)
+
 Therefore, given the following input string:  
 **5x5 (1, 3) (4, 4)**  
 one correct solution would be:  
